@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-// import { addProduct } from "@/app/actions";
-// import AuthModal from "./AuthModal";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
