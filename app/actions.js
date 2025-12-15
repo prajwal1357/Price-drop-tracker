@@ -1,6 +1,8 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
+import { scrapeProduct } from "@/lib/firecrawl";
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 export async function addProduct(formData) {
@@ -20,7 +22,6 @@ export async function addProduct(formData) {
       return { error: "Not authenticated" };
     }
 
-    // Scrape product data with Firecrawl
     const productData = await scrapeProduct(url);
 
     if (!productData.productName || !productData.currentPrice) {
@@ -31,7 +32,6 @@ export async function addProduct(formData) {
     const newPrice = parseFloat(productData.currentPrice);
     const currency = productData.currencyCode || "USD";
 
-    // Check if product exists to determine if it's an update
     const { data: existingProduct } = await supabase
       .from("products")
       .select("id, current_price")
@@ -41,7 +41,6 @@ export async function addProduct(formData) {
 
     const isUpdate = !!existingProduct;
 
-    // Upsert product (insert or update based on user_id + url)
     const { data: product, error } = await supabase
       .from("products")
       .upsert(
@@ -55,8 +54,8 @@ export async function addProduct(formData) {
           updated_at: new Date().toISOString(),
         },
         {
-          onConflict: "user_id,url", // Unique constraint on user_id + url
-          ignoreDuplicates: false, // Always update if exists
+          onConflict: "user_id,url", 
+          ignoreDuplicates: false, 
         }
       )
       .select()
@@ -64,7 +63,6 @@ export async function addProduct(formData) {
 
     if (error) throw error;
 
-    // Add to price history if it's a new product OR price changed
     const shouldAddHistory =
       !isUpdate || existingProduct.current_price !== newPrice;
 

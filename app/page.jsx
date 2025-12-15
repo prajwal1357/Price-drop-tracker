@@ -4,6 +4,8 @@ import AuthButton from "@/components/AuthButton";
 import { Button } from "@/components/ui/button";
 import { LogIn, Rabbit, Shield, Bell, TrendingDown  } from "lucide-react";
 import Image from "next/image";
+import ProductCard from "@/components/ProductCard";
+import { getProducts } from "./actions";
 
 export default async function Home() {
   const supabase = await createClient();
@@ -11,9 +13,7 @@ export default async function Home() {
     data: { user },
   } = await supabase.auth.getUser();
 
-//   const products = user ? await getProducts() : [];
-
-  const products = [];
+  const products = user ? await getProducts() : [];
 
   const FEATURES = [
     {
@@ -103,9 +103,9 @@ export default async function Home() {
           </div>
 
           <div className="grid gap-6 md:grid-cols-2 items-start">
-            {/* {products.map((product) => (
+            {products.map((product) => (
               <ProductCard key={product.id} product={product} />
-            ))} */}
+            ))}
           </div>
         </section>
       )}
